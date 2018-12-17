@@ -1,0 +1,42 @@
+.toggleButton {
+  background: transparent;
+  width: 74px;
+  height: 74px;
+  padding: 0;
+}
+
+.container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.play {
+  border-style: solid;
+  border-width: 37px 0px 37px 74px;
+  border-color: transparent transparent transparent red;
+}
+
+.paused {
+  border-style: double;
+  border-width: 0px 0px 0px 74px;
+  border-color: green;
+}
+
+.increment {
+  line-height: 70px;
+  font-size:70px;
+  align-items:center;
+  justify-content:center;
+  color: green;
+}
+
+.decrement {
+  line-height: 70px;
+  font-size:70px;
+  align-items:center;
+  justify-content:center;
+  color: red;
+}

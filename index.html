@@ -1,1 +1,71 @@
-"Hello World" 
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="./css/motivity.css"  />
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/javascript" src="js/core.js"></script>
+</head>
+<body class="body">
+<button class="toggleButton play" id="interactivity"></button><br><br>
+
+<div style="border:1px solid black">
+    Search Term:<input type="text" id="searchTerm"><br>
+    Searchable Text:<input type="text" id="searchableText"><br>
+    <button class="simpleButton" id="search">Search</button><br><br>
+    Search Term Occurrences:<br>
+    <p id="searchTermOccurrences"></p>
+</div><br>
+
+
+<div style="border:1px solid black">
+    Foo Limit:<input type="text" id="fooLimit"><br>
+    <p id="fooCounterLabel">Foo Counter:</p>
+    <button class="toggleButton decrement" id="fooDecrement">-</button>
+    <button class="toggleButton increment" id="fooIncrement">+</button>
+    <p id="fooCounterDisplay">0</p>
+</div><br>
+
+<div style="border:1px solid black">
+    <p id="barCounterLabel">Bar Counter:</p>
+    <button class="toggleButton decrement" id="barDecrement">-</button>
+    <button class="toggleButton increment" id="barIncrement">+</button>
+    <p id="barCounterDisplay">0</p>
+</div><br>
+
+<div style="border:1px solid black">
+    Multiplication Table:<br>
+    <p id="multiplicationTable"></p>
+</div><br>
+
+<script type="text/javascript">
+
+window.onload = registerElements;
+
+function registerElements() {
+    // Set up constants for the session
+    const fooCounter = Counter(document.getElementById('fooCounterDisplay'));
+    const barCounter = Counter(document.getElementById('barCounterDisplay'));
+    const interactivityDisplay = document.getElementById('interactivity');
+    const interactivityLock = Lock(interactivityDisplay, 'togglebutton play', 'togglebutton paused');
+    const fooCounterLimit = document.getElementById("fooLimit");
+    const fooCounterControl = new FooCounterControl(fooCounter, barCounter, fooCounterLimit, interactivityLock);
+    const barCounterControl = new BarCounterControl(barCounter, interactivityLock);
+    const searchDisplay = document.getElementById('searchTermOccurrences');
+    const searchTerm = document.getElementById('searchTerm');
+    const searchableText = document.getElementById('searchableText');
+    const searchControl = SearchControl(searchTerm, searchableText, searchDisplay, interactivityLock);
+
+    // Add event listeners
+    document.getElementById("interactivity").addEventListener("click", interactivityLock.toggleLock);
+    document.getElementById("fooIncrement").addEventListener("click", fooCounterControl.increment);
+    document.getElementById("fooDecrement").addEventListener("click", fooCounterControl.decrement);
+    document.getElementById("barIncrement").addEventListener("click", barCounterControl.increment);
+    document.getElementById("barDecrement").addEventListener("click", barCounterControl.decrement);
+    document.getElementById("search").addEventListener("click", searchControl.performSearch);
+
+    // Generate multiplication table
+    document.getElementById("multiplicationTable").innerHTML = multiplicationTable(12);
+}
+</script>
+</body>
+</html>
