@@ -1,0 +1,49 @@
+{
+  "Files": [
+    {
+      "Id": "H:\\Programming\\Source\\Website\\drssoccer55.github.io\\Doglas\\src\\Doglas.Client\\bin\\Debug\\net7.0\\wwwroot\\_framework\\blazor.webassembly.js",
+      "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js"
+    },
+    {
+      "Id": "H:\\Programming\\Source\\Website\\drssoccer55.github.io\\Doglas\\src\\Doglas.Client\\obj\\Debug\\net7.0\\build-gz\\G8fXFUsh.gz",
+      "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js.gz"
+    },
+    {
+      "Id": "H:\\Programming\\Source\\Website\\drssoccer55.github.io\\Doglas\\src\\Doglas.Client\\wwwroot\\books.json",
+      "PackagePath": "staticwebassets\\books.json"
+    },
+    {
+      "Id": "H:\\Programming\\Source\\Website\\drssoccer55.github.io\\Doglas\\src\\Doglas.Client\\wwwroot\\css\\index.css",
+      "PackagePath": "staticwebassets\\css\\index.css"
+    },
+    {
+      "Id": "H:\\Programming\\Source\\Website\\drssoccer55.github.io\\Doglas\\src\\Doglas.Client\\wwwroot\\favicon.ico",
+      "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "H:\\Programming\\Source\\Website\\drssoccer55.github.io\\Doglas\\src\\Doglas.Client\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "H:\\Programming\\Source\\Website\\drssoccer55.github.io\\Doglas\\src\\Doglas.Client\\wwwroot\\main.html",
+      "PackagePath": "staticwebassets\\main.html"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.Doglas.Client.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.build.Doglas.Client.props",
+      "PackagePath": "build\\Doglas.Client.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.buildMultiTargeting.Doglas.Client.props",
+      "PackagePath": "buildMultiTargeting\\Doglas.Client.props"
+    },
+    {
+      "Id": "obj\\Debug\\net7.0\\staticwebassets\\msbuild.buildTransitive.Doglas.Client.props",
+      "PackagePath": "buildTransitive\\Doglas.Client.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

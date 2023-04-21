@@ -1,0 +1,9 @@
+https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly?view=aspnetcore-7.0
+
+https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly?view=aspnetcore-7.0#standalone-deployment
+
+dotnet new bolero-app -o Doglas --server false
+
+dotnet publish
+
+I don't think I need webconfig.. just need to add files
