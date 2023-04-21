@@ -9,7 +9,7 @@
     "assembly": {
       "Bolero.dll": "sha256-ss+06fcsbIURdxoOAcm\/TyeHiHESgKD5PQGZLtxuRcw=",
       "Bolero.Html.dll": "sha256-R4CKPlKwJ9t9oWNicGkQ4w1RMh4gMxr7ZNX1Gia\/zB8=",
-      "Doglas.Client.dll": "sha256-i4yw13d6RPJAK0Ih2HfDtbZLhyOYNTSUefolqJC5pdc=",
+      "Doglas.Client.dll": "sha256-vqqly0RpqUCxofGv2fVjfVjLX12bqEGR2elCwS68KLs=",
       "Elmish.dll": "sha256-40aokYQ3e0couPmopt38N4RvJkusU+9m9L3Nn0tikpI=",
       "FSharp.Core.dll": "sha256-uSFVRuqI0VdSFqrDgFO7CH7D4hPoMrQp5EloWx1iFe8=",
       "FSharp.SystemTextJson.dll": "sha256-oXX98JEaNyAB3al+djazdR6xwngVSByYW981Wz9vpdI=",
@@ -60,7 +60,7 @@
     "libraryInitializers": null,
     "pdb": null,
     "runtime": {
-      "dotnet.7.0.5.og666xi4cv.js": "sha256-codB25EodaFEP43MDCfMBuKXU4LqurUKnQrpoMIFnPs=",
+      "dotnet.7.0.5.og666xi4cv.js": "sha256-UR9ADX3mCA+oxN6iV0HHO6c1YJavrq624KHeALLcwcI=",
       "dotnet.timezones.blat": "sha256-rIVQOJ+gHn4DeRSq6Ac3CURS8YBJG3P4CtYPfIuZ\/kk=",
       "dotnet.wasm": "sha256-6u4NhRISPvoDQ8pKvno9KKJh2aKqzTavj4dpcdFCV\/o=",
       "icudt_CJK.dat": "sha256-SZLtQnRc0JkwqHab0VUVP7T3uBPSeYzxzDnpxPpUnHk=",
