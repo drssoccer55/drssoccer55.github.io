@@ -1,1 +1,0 @@
-H:\Programming\Source\Website\drssoccer55.github.io\Doglas\src\Doglas.Client\bin\Debug\net7.0\publish\web.config
