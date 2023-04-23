@@ -7,3 +7,6 @@ dotnet new bolero-app -o Doglas --server false
 dotnet publish
 
 I don't think I need webconfig.. just need to add files
+
+Need to delete obj and bin folders and republish or sha hashes might be wrong
+https://stackoverflow.com/questions/69926878/failed-to-find-a-valid-digest-in-the-integrity-attribute-for-resource-in-blazo
