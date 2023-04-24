@@ -5,3 +5,4 @@ function createChart(key, data) {
 
     new Chart(ctx, data);
 }
+

@@ -21,10 +21,6 @@ body {
   min-height: 100%;
 }
 
-#counter {
-  width: 80px;
-}
-
 #notification-area {
   position: fixed;
   bottom: 0;

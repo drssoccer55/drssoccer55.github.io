@@ -11,20 +11,17 @@ open Microsoft.JSInterop
 open System.Text.Json
 open Spreadsheet
 open Chart
+open Utils
 
 /// Routing endpoints definition.
 type Page =
     | [<EndPoint "/">] Home
-    | [<EndPoint "/counter">] Counter
-    | [<EndPoint "/data">] Data
     | [<EndPoint "/graphs">] Graphs
 
 /// The Elmish application's model.
 type Model =
     {
         page: Page
-        counter: int
-        books: Book[] option
         error: string option
         graphs: Graph list option // Todo break up this model why tf does it start like this
     }
@@ -46,8 +43,6 @@ and Graph =
 let initModel =
     {
         page = Home
-        counter = 0
-        books = None
         error = None
         graphs = None
     }
@@ -56,11 +51,6 @@ let initModel =
 /// The Elmish application's update messages.
 type Message =
     | SetPage of Page
-    | Increment
-    | Decrement
-    | SetCounter of int
-    | GetBooks
-    | GotBooks of Book[]
     | GetGraphs
     | GotGraphs of Graph list
     | RenderGraphs
@@ -80,22 +70,11 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
     log js message
     match message with
     | SetPage page ->
-        { model with page = page }, Cmd.none
-
-    | Increment ->
-        { model with counter = model.counter + 1 }, Cmd.none
-    | Decrement ->
-        { model with counter = model.counter - 1 }, Cmd.none
-    | SetCounter value ->
-        { model with counter = value }, Cmd.none
-
-    | GetBooks ->
-        let getBooks() = http.GetFromJsonAsync<Book[]>("/books.json")
-        let cmd = Cmd.OfTask.either getBooks () GotBooks Error
-        { model with books = None }, cmd
-    | GotBooks books ->
-        { model with books = Some books }, Cmd.none
-
+        let nextCmd =
+            match page with
+            | Graphs -> Cmd.ofMsg RenderGraphs // if navigating back to graphs need to re-render
+            | _ -> Cmd.none
+        { model with page = page }, nextCmd
     | GetGraphs ->
         let stringToJsonStr (s:string) =
             // Try to skip complexity for now and assume response is always same prefix and suffix
@@ -118,33 +97,38 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
             match s with
             | None -> []
             | Some s ->
-                let rows = Spreadsheet.getRowsFilteredForKey s "w"
-                let dataRows =
+                let keys = Spreadsheet.getKeys s |> Set.remove "Key" |> Set.toList  // key is a reserved work
+                let keyRows =
+                    List.map (fun k -> k, Spreadsheet.getRowsFilteredForKey s k) keys
+                    |> Map.ofList
+
+                let keyRowsMap =
                     fun (r:Row) ->
                         {
                             x = r.c.Item(1).v |> strToDate
                             y = r.c.Item(2).v |> float
                         }
-                    |> List.map <| rows
+                    |> List.map
+                    |> konst
+                    |> Map.map <| keyRows
 
-                let chart =
-                    {
-                        ``type`` = "scatter"
-                        data = {
-                                datasets = [{
-                                    DataSet.label = "w"
-                                    DataSet.data = dataRows
-                                }]
-                            }
+                fun (key, dataRow) ->
+                    let chart =
+                        {
+                            ``type`` = "scatter"
+                            data = {
+                                    datasets = [{
+                                        DataSet.label = key
+                                        DataSet.data = dataRow
+                                    }]
+                                }
                     }
 
-                let graph =
                     {
-                        key = "w"
+                        key = key
                         chart = chart
                     }
-                
-                List.singleton graph
+                |> List.map <| Map.toList keyRowsMap
 
         let strToGraphs = stringToJsonStr >> Option.bind jsonToSpreadsheet >> spreadsheetToGraphs >> GotGraphs
         let getSpreadsheetTask () = 
@@ -155,17 +139,16 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
         { model with graphs = None }, cmd
     | GotGraphs graphs ->
         { model with graphs = Some graphs }, Cmd.ofMsg RenderGraphs
-
     | RenderGraphs ->
         fun (graphs: Graph list) ->
             fun g ->
+                // Check if element exists
                 js.InvokeVoidAsync("createChart", g.key, g.chart)
                 |> ignore
             |> List.iter <| graphs
         |> Option.iter <| model.graphs
             
         model, Cmd.none
-
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -178,29 +161,6 @@ type Main = Template<"wwwroot/main.html">
 
 let homePage model dispatch =
     Main.Home().Elt()
-
-let counterPage model dispatch =
-    Main.Counter()
-        .Decrement(fun _ -> dispatch Decrement)
-        .Increment(fun _ -> dispatch Increment)
-        .Value(model.counter, fun v -> dispatch (SetCounter v))
-        .Elt()
-
-let dataPage model dispatch =
-    Main.Data()
-        .Reload(fun _ -> dispatch GetBooks)
-        .Rows(cond model.books <| function
-            | None ->
-                Main.EmptyData().Elt()
-            | Some books ->
-                forEach books <| fun book ->
-                    tr {
-                        td { book.title }
-                        td { book.author }
-                        td { book.publishDate.ToString("yyyy-MM-dd") }
-                        td { book.isbn }
-                    })
-        .Elt()
 
 let graphsPage js model dispatch =
     Main.Graphs()
@@ -229,15 +189,11 @@ let view js model dispatch =
     Main()
         .Menu(concat {
             menuItem model Home "Home"
-            menuItem model Counter "Counter"
-            menuItem model Data "Download data"
             menuItem model Graphs "Graphs"
         })
         .Body(
             cond model.page <| function
             | Home -> homePage model dispatch
-            | Counter -> counterPage model dispatch
-            | Data -> dataPage model dispatch
             | Graphs -> graphsPage js model dispatch
         )
         .Error(
@@ -263,5 +219,5 @@ type MyApp() =
     override this.Program =
         let update = update this.HttpClient this.JSRuntime
         let view = view this.JSRuntime
-        Program.mkProgram (fun _ -> initModel, Cmd.batch (seq {Cmd.ofMsg GetGraphs; Cmd.ofMsg GetBooks})) update view
+        Program.mkProgram (fun _ -> initModel, Cmd.batch (seq {Cmd.ofMsg GetGraphs})) update view
         |> Program.withRouter router
