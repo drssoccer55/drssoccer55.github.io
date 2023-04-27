@@ -56,7 +56,7 @@ let strToDate (s:string) =
     match DateTime.TryParse s with
     | true, dt ->
         let t = dt - DateTime.UnixEpoch
-        t.TotalSeconds |> float
+        t.TotalMilliseconds |> float
     | _ -> 0 |> float // TODO
 
 let update (http: HttpClient) (js: IJSRuntime) message model =
@@ -113,6 +113,15 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
                                         DataSet.data = dataRow
                                     }]
                                 }
+                            options = {
+                                scales = {
+                                    x = {
+                                        ticks = {
+                                            callback = """return moment(label).format("MM/DD/YY hh:mm");"""
+                                        }
+                                    }
+                                }
+                            } |> Some
                     }
 
                     {
