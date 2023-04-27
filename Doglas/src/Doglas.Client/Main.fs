@@ -14,6 +14,7 @@ open Chart
 open Utils
 
 /// Routing endpoints definition.
+// I don't think the EndPoint attribute gets used now that I have a custom router.
 type Page =
     | [<EndPoint "/">] Home
     | [<EndPoint "/graphs">] Graphs
@@ -24,14 +25,6 @@ type Model =
         page: Page
         error: string option
         graphs: Graph list option // Todo break up this model why tf does it start like this
-    }
-
-and Book =
-    {
-        title: string
-        author: string
-        publishDate: DateTime
-        isbn: string
     }
 
 and Graph =
@@ -70,11 +63,9 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
     log js message
     match message with
     | SetPage page ->
-        let nextCmd =
-            match page with
-            | Graphs -> Cmd.ofMsg RenderGraphs // if navigating back to graphs need to re-render
-            | _ -> Cmd.none
-        { model with page = page }, nextCmd
+        match page with
+        | Graphs -> { model with page = page }, Cmd.ofMsg RenderGraphs // if navigating to graphs need to render
+        | _ -> { model with page = page }, Cmd.none
     | GetGraphs ->
         let stringToJsonStr (s:string) =
             // Try to skip complexity for now and assume response is always same prefix and suffix
@@ -155,7 +146,29 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
         { model with error = None }, Cmd.none
 
 /// Connects the routing system to the Elmish application.
-let router = Router.infer SetPage (fun model -> model.page)
+// https://fsbolero.io/docs/Routing#format
+let router :Router<Page, Model, Message> =
+    {
+        // getEndPoint : Model -> Page
+        getEndPoint = fun m -> m.page
+        // setRoute : string -> option<Message>
+        setRoute = fun path ->
+            let basicPathList l =
+                match l with
+                | [] -> Some Home
+                | ["graphs"] -> Some Graphs
+                | _ -> None
+
+            match Array.toList <| path.Trim('/').Split('/') with
+            | "?p=" :: p -> basicPathList p
+            | l -> basicPathList l
+            |> Option.map SetPage
+
+        // getRoute : Page -> string
+        getRoute = function
+            | Home -> "/"
+            | Graphs -> "/graphs"
+    }
 
 type Main = Template<"wwwroot/main.html">
 
@@ -177,6 +190,9 @@ let graphsPage js model dispatch =
                 |> forEach graphs
         )
         .Elt()
+
+let emptyPage model dispatch =
+    empty()
 
 let menuItem (model: Model) (page: Page) (text: string) =
     Main.MenuItem()
