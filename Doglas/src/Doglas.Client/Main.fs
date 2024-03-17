@@ -18,6 +18,7 @@ open Utils
 type Page =
     | [<EndPoint "/">] Home
     | [<EndPoint "/graphs">] Graphs
+    | [<EndPoint "/party">] Party
 
 /// The Elmish application's model.
 type Model =
@@ -25,6 +26,7 @@ type Model =
         page: Page
         error: string option
         graphs: Graph list option // Todo break up this model why tf does it start like this
+        partyComments: PartyComment list option
     }
 
 and Graph =
@@ -32,12 +34,19 @@ and Graph =
         chart: Chart
         key: string
     }
+and PartyComment =
+    {
+        name: string
+        comment: string
+        htmlColor: string
+    }
 
 let initModel =
     {
         page = Home
         error = None
         graphs = None
+        partyComments = None
     }
 
 
@@ -47,6 +56,8 @@ type Message =
     | GetGraphs
     | GotGraphs of Graph list
     | RenderGraphs
+    | GetPartyComments
+    | GotPartyComments of PartyComment list
     | Error of exn
     | ClearError
 
@@ -59,6 +70,23 @@ let strToDate (s:string) =
         t.TotalMilliseconds |> float
     | _ -> 0 |> float // TODO
 
+let stringToJsonStr (s:string) =
+    // Try to skip complexity for now and assume response is always same prefix and suffix
+    let prefixToRemove = "google.visualization.Query.setResponse("
+    let sIndex = s.IndexOf(prefixToRemove)
+    // Need to be careful with substring bc errors silently ignored
+    match sIndex with
+    | -1 -> None
+    | d -> s.Substring(d + prefixToRemove.Length, s.Length - d - prefixToRemove.Length - 2) |> Some
+
+let jsonToSpreadsheet js (s:string) =
+    try
+        JsonSerializer.Deserialize<Spreadsheet>(s) |> Some
+    with
+        | :? System.ArgumentNullException -> error js "Cannot convert json to spreadsheet because argument is null"; None
+        | :? System.Text.Json.JsonException as ex -> error js ("Cannot convert json to spreadsheet because the json is invalid: " + ex.ToString()); None
+        | :? System.NotSupportedException as ex -> error js ("Cannot convert json to spreadsheet because no compatible deserializer: " + ex.ToString()); None
+
 let update (http: HttpClient) (js: IJSRuntime) message model =
     log js message
     match message with
@@ -67,23 +95,6 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
         | Graphs -> { model with page = page }, Cmd.ofMsg RenderGraphs // if navigating to graphs need to render
         | _ -> { model with page = page }, Cmd.none
     | GetGraphs ->
-        let stringToJsonStr (s:string) =
-            // Try to skip complexity for now and assume response is always same prefix and suffix
-            let prefixToRemove = "google.visualization.Query.setResponse("
-            let sIndex = s.IndexOf(prefixToRemove)
-            // Need to be careful with substring bc errors silently ignored
-            match sIndex with
-            | -1 -> None
-            | d -> s.Substring(d + prefixToRemove.Length, s.Length - d - prefixToRemove.Length - 2) |> Some
-
-        let jsonToSpreadsheet (s:string) =
-            try
-                JsonSerializer.Deserialize<Spreadsheet>(s) |> Some
-            with
-                | :? System.ArgumentNullException -> error js "Cannot convert json to spreadsheet because argument is null"; None
-                | :? System.Text.Json.JsonException as ex -> error js ("Cannot convert json to spreadsheet because the json is invalid: " + ex.ToString()); None
-                | :? System.NotSupportedException as ex -> error js ("Cannot convert json to spreadsheet because no compatible deserializer: " + ex.ToString()); None
-
         let spreadsheetToGraphs (s:Spreadsheet option) =
             match s with
             | None -> []
@@ -130,7 +141,7 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
                     }
                 |> List.map <| Map.toList keyRowsMap
 
-        let strToGraphs = stringToJsonStr >> Option.bind jsonToSpreadsheet >> spreadsheetToGraphs >> GotGraphs
+        let strToGraphs = stringToJsonStr >> Option.bind (jsonToSpreadsheet js) >> spreadsheetToGraphs >> GotGraphs
         let getSpreadsheetTask () = 
             http.GetStringAsync("https://docs.google.com/spreadsheets/u/0/d/1y0eRzRaPnncd5ckQdI6tgbhHH5g9fGwNI-Tbq-7SMWY/gviz/tq?tqx=out:json&tq=select+*")
             |> Task.map strToGraphs
@@ -149,6 +160,28 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
         |> Option.iter <| model.graphs
             
         model, Cmd.none
+    | GetPartyComments ->
+        let spreadsheetToPartyComments (s:Spreadsheet option) =
+            match s with
+            | None -> []
+            | Some s ->
+                fun (row:Row) ->
+                    {
+                        name = row.c.Item(0).v
+                        htmlColor = row.c.Item(1).v
+                        comment = row.c.Item(2).v
+                    }
+                |> List.map <| s.table.rows
+
+        let strToParty = stringToJsonStr >> Option.bind (jsonToSpreadsheet js) >> spreadsheetToPartyComments >> GotPartyComments
+        let getSpreadsheetTask () = 
+            http.GetStringAsync("https://docs.google.com/spreadsheets/u/0/d/1OCiqaic-CHct2ltSjTvEaY4AevekwrP4sX8BavScWhQ/gviz/tq?tqx=out:json&tq=select+*")
+            |> Task.map strToParty
+
+        let cmd = Cmd.OfTask.either getSpreadsheetTask () id Error
+        { model with graphs = None }, cmd
+    | GotPartyComments partyComments ->
+        { model with partyComments = Some partyComments }, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -166,17 +199,25 @@ let router :Router<Page, Model, Message> =
                 match l with
                 | [] -> Some Home
                 | ["graphs"] -> Some Graphs
+                | ["party"] -> Some Party
                 | _ -> None
 
             match Array.toList <| path.Trim('/').Split('/') with
             | "?p=" :: p -> basicPathList p
             | l -> basicPathList l
-            |> Option.map SetPage
 
         // getRoute : Page -> string
         getRoute = function
             | Home -> "/"
             | Graphs -> "/graphs"
+            | Party -> "/party"
+
+        makeMessage = function
+            | Home -> SetPage Home
+            | Graphs -> SetPage Graphs
+            | Party -> SetPage Party
+
+        notFound = Some Home
     }
 
 type Main = Template<"wwwroot/main.html">
@@ -184,7 +225,7 @@ type Main = Template<"wwwroot/main.html">
 let homePage model dispatch =
     Main.Home().Elt()
 
-let graphsPage js model dispatch =
+let graphsPage model dispatch =
     Main.Graphs()
         .Reload(fun _ -> dispatch GetGraphs)
         .WGraph(cond model.graphs <| function
@@ -197,6 +238,40 @@ let graphsPage js model dispatch =
                         }
                     }
                 |> forEach graphs
+        )
+        .Elt()
+
+let partyPage model dispatch =
+    let paddedHeader str =
+        th {
+            attr.style "padding: 6px"
+            text str
+        }
+
+    let paddedRowData str =
+        td {
+            attr.style "padding: 6px"
+            text str
+        }
+
+    Main.Party()
+        .PartyComments(cond model.partyComments <| function
+            | None -> empty()
+            | Some comments ->
+                table {
+                    attr.border "1px solid black"
+                    tr {
+                        paddedHeader "Name"
+                        paddedHeader "Comment"
+                    }
+                    fun comment ->
+                        tr {
+                            attr.style ("color: " + comment.htmlColor)
+                            paddedRowData comment.name
+                            paddedRowData comment.comment
+                        }
+                    |> forEach comments
+                }
         )
         .Elt()
 
@@ -215,11 +290,13 @@ let view js model dispatch =
         .Menu(concat {
             menuItem model Home "Home"
             menuItem model Graphs "Graphs"
+            menuItem model Party "Party"
         })
         .Body(
             cond model.page <| function
             | Home -> homePage model dispatch
-            | Graphs -> graphsPage js model dispatch
+            | Graphs -> graphsPage model dispatch
+            | Party -> partyPage model dispatch
         )
         .Error(
             cond model.error <| function
@@ -244,5 +321,5 @@ type MyApp() =
     override this.Program =
         let update = update this.HttpClient this.JSRuntime
         let view = view this.JSRuntime
-        Program.mkProgram (fun _ -> initModel, Cmd.batch (seq {Cmd.ofMsg GetGraphs})) update view
+        Program.mkProgram (fun _ -> initModel, Cmd.batch (seq {Cmd.ofMsg GetGraphs; Cmd.ofMsg GetPartyComments})) update view
         |> Program.withRouter router
