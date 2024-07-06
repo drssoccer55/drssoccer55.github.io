@@ -1,0 +1,90 @@
+<div class="columns">
+  <aside class="column sidebar is-narrow">
+    <section class="section">
+      <nav class="menu">
+        <ul class="menu-list">
+          ${Menu}
+          <template id="MenuItem">
+            <li><a class="${Active}" href="${Url}">${Text}</a></li>
+          </template>
+        </ul>
+      </nav>
+    </section>
+  </aside>
+  <div class="column">
+    <section class="section">
+      ${Body}
+
+      <div id="notification-area">
+        <div>${Error}</div>
+      </div>
+
+      <template id="Home">
+        <div class="content">
+          <h1 class="title">Welcome to Douglas Sexton's Bolero Site!</h1>
+          <p>This is a static site mostly written in F#!</p>
+          <ul>
+            <li>
+              The entire application is driven by
+              <a target="_blank" href="https://fsbolero.github.io/docs/Elmish">Elmish</a>.
+            </li>
+            <li>
+              The menu on the left switches pages based on
+              <a target="_blank" href="https://fsbolero.github.io/docs/Routing">routes</a>.
+            </li>
+            <li>
+              The <a href="/graphs">Graphs</a> page uses google sheets as a db
+            </li>
+          </ul>
+          <p>Enjoy writing awesome apps!</p>
+        </div>
+      </template>
+
+      <template id="Graphs">
+          <h1 class="title">
+            Graphs
+            <button class="button" onclick="${Reload}">Reload</button>
+          </h1>
+          <p>Using google spreadsheets as a read-only db I can update from my phone anywhere</p>
+          <p>Using Chart.Js for graphs currently</p>
+          ${WGraph}
+      </template>
+
+      <template id="Party">
+          <h1 class="title">Happy BirthDoug</h1>
+          <p>Fri, Aug 2nd - Doug's Place - High Dive</p>
+          <br />
+          <p>
+              It's BirthDoug time. I turn 29 at the end of July. I don't love getting older, but, we have to respect it. Let's respect it with a party.
+
+              Plan is anyone can come over Friday evening after 6:30 PM and optionally can catch
+              <a href="https://www.tixr.com/groups/highdive/events/dang-a-soulful-electronic-dance-night-107625">
+                  DANG! A Soulful Electronic Dance Night @ High Dive
+              </a>
+              . I'm the kind of person that did my comp sci projects early so you can actually come @ 6:30 I'll be ready. Nectar thing is 9:30PM-2AM.
+              I'd get a $10 ticket because who knows when we get there.
+              They have a nice
+              <a href="https://open.spotify.com/playlist/4FF7tf0TWLChtgVD7cEiPg?si=5eb26907dc70437e">
+                  spotify preview playlist
+              </a>
+              . Due to the previous bouncing during Dougwarming, we will now be strictly monitoring road beers.
+          </p>
+          <br />
+          <p>
+              Feel free to bring some alcohol or snacks. Can always ask me what's needed. Message me for my address if you don't already have it!
+          </p>
+          <br />
+          ${PartyComments}
+          ${PartySketch}
+      </template>
+
+      <template id="ErrorNotification">
+        <div class="notification is-warning">
+          <button class="delete ${HideClass}" onclick="${Hide}"></button>
+          ${Text}
+        </div>
+      </template>
+
+    </section>
+  </div>
+</div>
