@@ -28,7 +28,15 @@ var memoize = function (passedFunc) {
 }
 
 var canvasMem = memoize(function (key) {
-    return document.getElementById(key);
+    // hack because on.preventDefault seems to not work
+    let canvas = document.getElementById(key);
+    canvas.onwheel = function (event) {
+        event.preventDefault();
+    };
+    canvas.onmousewheel = function (event) {
+        event.preventDefault();
+    };
+    return canvas;
 });
 
 var canvas2dContext = memoize(function (key) {
