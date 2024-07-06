@@ -8,6 +8,7 @@
     <Compile Include="Task.fs" />
     <Compile Include="Spreadsheet.fs" />
     <Compile Include="Chart.fs" />
+    <Compile Include="PartySketch.fs" />
     <Compile Include="Main.fs" />
     <Compile Include="Startup.fs" />
   </ItemGroup>

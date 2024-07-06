@@ -2,7 +2,6 @@ module Doglas.Client.Main
 
 open System
 open System.Net.Http
-open System.Net.Http.Json
 open Microsoft.AspNetCore.Components
 open Elmish
 open Bolero
@@ -12,6 +11,7 @@ open System.Text.Json
 open Spreadsheet
 open Chart
 open Utils
+open PartySketch
 
 /// Routing endpoints definition.
 // I don't think the EndPoint attribute gets used now that I have a custom router.
@@ -38,7 +38,7 @@ and PartyComment =
     {
         name: string
         comment: string
-        htmlColor: string
+        style: string
     }
 
 let initModel =
@@ -60,6 +60,7 @@ type Message =
     | GotPartyComments of PartyComment list
     | Error of exn
     | ClearError
+    | SendPartyComment of PartySketch.Comment
 
 let log (js: IJSRuntime) (s:obj) = js.InvokeVoidAsync("console.log", s) |> ignore
 let error (js: IJSRuntime) (s:obj) = js.InvokeVoidAsync("console.error", s) |> ignore
@@ -168,7 +169,7 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
                 fun (row:Row) ->
                     {
                         name = row.c.Item(0).v
-                        htmlColor = row.c.Item(1).v
+                        style = row.c.Item(1).v
                         comment = row.c.Item(2).v
                     }
                 |> List.map <| s.table.rows
@@ -186,6 +187,15 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
         { model with error = None }, Cmd.none
+    | SendPartyComment comment ->
+        // Maybe I'll make an object for this at some point
+        let postBody = "{\"name\":\"" + comment.name + "\",\"style\":\"" + comment.style + "\",\"content\":\"" + comment.comment + "\"}"
+        let httpContent = new StringContent(postBody, System.Text.Encoding.UTF8, "text/plain");
+        let getPostTask () =
+            http.PostAsync("https://script.google.com/macros/s/AKfycbxjvgwXKmQcrkc3Vqju3C01u-wY47ie7NBlL3d979UjGEJ13raMaFKS27E0nW0iwVtX/exec", httpContent)
+
+        // Not checking result of httpresponsemessage yet
+        model, Cmd.OfTask.perform getPostTask () (fun _ -> GetPartyComments)
 
 /// Connects the routing system to the Elmish application.
 // https://fsbolero.io/docs/Routing#format
@@ -241,18 +251,33 @@ let graphsPage model dispatch =
         )
         .Elt()
 
-let partyPage model dispatch =
+let partyPage js model dispatch =
+
+    let dispatchComment partySketch = SendPartyComment(partySketch) |> dispatch
+
     let paddedHeader str =
         th {
             attr.style "padding: 6px"
             text str
         }
 
-    let paddedRowData str =
+    let paddedRowNode (node:Node) =
         td {
             attr.style "padding: 6px"
-            text str
+            node
         }
+
+    let paddedRowData str =
+        text str |> paddedRowNode
+
+    let paddedRowDataImg (str: string) =
+        match str with
+        | a when str.StartsWith "data:image" ->
+            img {
+                attr.src str
+            } |> paddedRowNode
+        | _ -> paddedRowData str
+
 
     Main.Party()
         .PartyComments(cond model.partyComments <| function
@@ -266,13 +291,14 @@ let partyPage model dispatch =
                     }
                     fun comment ->
                         tr {
-                            attr.style ("color: " + comment.htmlColor)
+                            attr.style (comment.style)
                             paddedRowData comment.name
-                            paddedRowData comment.comment
+                            paddedRowDataImg comment.comment
                         }
                     |> forEach comments
                 }
         )
+        .PartySketch(PartySketch.createCanvas(js, dispatchComment, "sketchCanvas"))
         .Elt()
 
 let emptyPage model dispatch =
@@ -296,7 +322,7 @@ let view js model dispatch =
             cond model.page <| function
             | Home -> homePage model dispatch
             | Graphs -> graphsPage model dispatch
-            | Party -> partyPage model dispatch
+            | Party -> partyPage js model dispatch
         )
         .Error(
             cond model.error <| function
