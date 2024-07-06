@@ -157,7 +157,7 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
         }
         canvas {
             attr.id key
-            attr.style "border-style: solid"
+            attr.style "border-style: solid; touch-action: none"
             on.mousedown mouseDown
             on.mouseup mouseUp
             on.mousemove mouseMove
