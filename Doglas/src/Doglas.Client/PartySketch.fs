@@ -57,6 +57,11 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
         drawContext.prevY <- mea.ClientY
         drawContext.mouseDown <- true
 
+    let touchDown = fun (tea : Web.TouchEventArgs) -> 
+        drawContext.prevX <- tea.Touches[0].ClientX
+        drawContext.prevY <- tea.Touches[0].ClientY
+        drawContext.mouseDown <- true
+
     let mouseUp = fun _ -> 
         drawContext.mouseDown <- false
 
@@ -66,6 +71,13 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
         js.InvokeVoidAsync("draw", key, drawContext) |> ignore
         drawContext.prevX <- mea.ClientX
         drawContext.prevY <- mea.ClientY
+
+    let touchMove = fun (tea : Web.TouchEventArgs) -> 
+        drawContext.curX <- tea.Touches[0].ClientX
+        drawContext.curY <- tea.Touches[0].ClientY
+        js.InvokeVoidAsync("draw", key, drawContext) |> ignore
+        drawContext.prevX <- tea.Touches[0].ClientX
+        drawContext.prevY <- tea.Touches[0].ClientY
 
     let saveSketch = fun _ ->
         // Async.RunSynchronously hangs, see https://github.com/fsbolero/Bolero/issues/14
@@ -150,5 +162,9 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
             on.mouseup mouseUp
             on.mousemove mouseMove
             on.mouseout mouseUp
+            on.touchstart touchDown
+            on.touchend mouseUp
+            on.touchcancel mouseUp
+            on.touchmove touchMove
         }
     }
