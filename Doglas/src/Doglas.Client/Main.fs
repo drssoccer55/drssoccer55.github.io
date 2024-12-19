@@ -12,6 +12,7 @@ open Spreadsheet
 open Chart
 open Utils
 open PartySketch
+open Personal
 
 /// Routing endpoints definition.
 // I don't think the EndPoint attribute gets used now that I have a custom router.
@@ -19,6 +20,8 @@ type Page =
     | [<EndPoint "/">] Home
     | [<EndPoint "/graphs">] Graphs
     | [<EndPoint "/party">] Party
+    | [<EndPoint "/personal">] Personal
+    | [<EndPoint "/personal/rlbot">] RLBot
 
 /// The Elmish application's model.
 type Model =
@@ -210,6 +213,8 @@ let router :Router<Page, Model, Message> =
                 | [] -> Some Home
                 | ["graphs"] -> Some Graphs
                 | ["party"] -> Some Party
+                | ["personal"] -> Some Personal
+                | ["personal"; "rlbot"] -> Some RLBot
                 | _ -> None
 
             match Array.toList <| path.Trim('/').Split('/') with
@@ -221,11 +226,15 @@ let router :Router<Page, Model, Message> =
             | Home -> "/"
             | Graphs -> "/graphs"
             | Party -> "/party"
+            | Personal -> "/personal"
+            | RLBot -> "/personal/rlbot"
 
         makeMessage = function
             | Home -> SetPage Home
             | Graphs -> SetPage Graphs
             | Party -> SetPage Party
+            | Personal -> SetPage Personal
+            | RLBot -> SetPage RLBot
 
         notFound = Some Home
     }
@@ -311,18 +320,28 @@ let menuItem (model: Model) (page: Page) (text: string) =
         .Text(text)
         .Elt()
 
+// From the page which pages are available in the menu
+let menuPages (page: Page) =
+    match page with
+    | Home -> [(Personal, "Personal Projects")]
+    | Personal -> [(Home, "Home"); (RLBot, "RLBot")]
+    | Graphs -> [(Home, "Home"); (Party, "Party")]
+    | Party -> [(Home, "Home"); (Graphs, "Graphs")]
+    | RLBot -> [(Home, "Home"); (Personal, "Personal Projects")]
+
+let menuOfTuple model (page: Page, label: string) =
+    menuItem model page label
+
 let view js model dispatch =
     Main()
-        .Menu(concat {
-            menuItem model Home "Home"
-            menuItem model Graphs "Graphs"
-            menuItem model Party "Party"
-        })
+        .Menu(forEach (menuPages model.page) (menuOfTuple model))
         .Body(
             cond model.page <| function
             | Home -> homePage model dispatch
             | Graphs -> graphsPage model dispatch
             | Party -> partyPage js model dispatch
+            | Personal -> personalPage model dispatch
+            | RLBot -> rlbotPage model dispatch
         )
         .Error(
             cond model.error <| function
