@@ -2,15 +2,18 @@
     <div class="content">
         <h1 class="title">Personal Portfolio</h1>
         <p>
-            Programming on your own is fun! I find a lot of joy working on whatever interests me. It often presents new challenges and new opportunites to work with
-            technologies I would not normally get to work on. Please use the sidebar to check out some of the things I've cooked up.
+            Programming on your own is fun! I find a lot of joy working on whatever interests me. It often presents new challenges and new opportunites that I may not be able
+            to find in the workplace. Click the links to see what I've cooked up.
         </p>
         <ul>
             <li>
-                A Rocket League AI Framework <a target="_blank" href="/personal/rlbot">RLBot</a>
+                A Rocket League AI Framework <a href="/personal/rlbot">RLBot</a>
             </li>
             <li>
-                An android app for internet radio using Kotlin (coming soon)
+                An android app for internet radio using Kotlin <a href="/personal/rlbot">DoglasRadio</a>
+            </li>
+            <li>
+                This <a href="/personal/website">website</a> is written in F# using Bolero
             </li>
         </ul>
     </div>
@@ -83,8 +86,8 @@
         <p>
             I had made a proof of concept. I tried training a small model to mimic the joystick presses I input while playing the game. It just kinda drove around randomly
             which didn't surprise me too much because there was almost no data. It was slightly distinct from completely random because at least it learned that I usually
-            accelerate forward and make occasional turns. You can watch that <a href="https://www.youtube.com/watch?v=RTDQZHvtNjA">here</a>.
-            I made a <a href="https://www.youtube.com/watch?v=RTDQZHvtNjA">post on reddit</a> about the project and gome some useful feedback. The most useful feedback was
+            accelerate forward and make occasional turns. You can watch that <a target="_blank" href="https://www.youtube.com/watch?v=RTDQZHvtNjA">here</a>.
+            I made a <a target="_blank" href="https://www.youtube.com/watch?v=RTDQZHvtNjA">post on reddit</a> about the project and gome some useful feedback. The most useful feedback was
             about opening the project to be accessible to others. Someone brought to my attention the DOOM AI tournament and that gave me the idea to run an AI tournament
             in Rocket League. I put in some more work to the framework and posted on the Rocket League subreddit my initial tournament promotion.
         </p>
@@ -95,7 +98,7 @@
             I was fortunate that people were interested and eagerly joined the discord I created for the tournament. Some people ran into problems right away with the memory
             reading where it just wasn't giving them game values on their machine. Some people were successfully using the framework. Fortunately it didn't fall apart right
             away. I was extremely active and attentive to suggestions. An individual named ccman32 was extremely helpful for the intial rewrite. He had some experience with
-            decompiling unreal engine games and suggested <a href="https://en.wikipedia.org/wiki/DLL_injection">here</a>DLL injection. With DLL injection we could access
+            decompiling unreal engine games and suggested <a target="_blank" href="https://en.wikipedia.org/wiki/DLL_injection">here</a>DLL injection. With DLL injection we could access
             game code and use it to get the data we needed. In order to share the data across processes we used a windows feature called Named Shared Memory which allowed
             Rocket League with the injected DLL to constantly write game data we needed to a memory location with a known name. Any other process could read/write to the same
             memory which gave some interop. This was a good enough framework for the first tournament.
@@ -135,6 +138,42 @@
             realized by a bot named Seer (highly recommend checking this bot out) ~6-7 years after my work initially started. While I am no longer actively involved in the
             community and haven't been for some time it is crazy to see everything that has involved from what just started as a personal project fresh out of college. I'm
             grateful to so many people in the community and I apologize to the many peoples names I have omitted in this writeup.
+        </p>
+    </div>
+</template>
+
+<template id="DoglasRadio">
+    <div class="content">
+        <h1 class="title">Doglas Radio</h1>
+        <p>
+            This project had a few new things for me, andriod app development and working in Kotlin. I had recently installed a touch screen radio in my '05 Corolla that had
+            android auto. I was curious if I could make a working android auto app for my car. Specifically I wanted to add New York sports WFAN and the Philadelphia jazz station
+            WRTI. These radio stations both have internet feeds so I can listen to them outside the geographic range.
+        </p>
+        <img style="width:400px" src="images/doglasRadio_1.jpg" />
+        <img style="width:400px" src="images/doglasRadio_2.jpg" />
+        <img style="width:400px" src="images/doglasRadio_3.jpg" />
+        <p>
+            This is pretty simple and I can confirm this does work in my car. There may be other android auto internet radio apps out there but this one is mine
+            and I'm proud of that!
+        </p>
+    </div>
+</template>
+
+<template id="Website">
+    <div class="content">
+        <h1 class="title">My Personal Website</h1>
+        <p>
+            You are using this project now! This website is an attempt to learn and use some interesting technologies for web development.
+            This site uses <a target="_blank" href="https://fsbolero.io/docs/">Bolero</a> and is mostly written in F#!
+        </p>
+        <h2>Why Bolero?</h2>
+        <p>
+            I spent 3 years professionally being a functional developer in F# and I loved using the langauge. Professionally I used Websharper
+            where I could write in F# and it would transpile to javascript. I wanted to learn a slightly different technology and also learn about
+            WebAssembly at the same time. I am able to write this website almost entirely in F#. It compiles to WebAssembly and some auto-generated
+            javascript from the framework provides the interop of Javascript and WebAssembly. It's a backend developers dream to not have to write in
+            javascript!
         </p>
     </div>
 </template>

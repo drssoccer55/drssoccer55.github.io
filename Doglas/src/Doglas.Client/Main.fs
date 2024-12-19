@@ -22,6 +22,8 @@ type Page =
     | [<EndPoint "/party">] Party
     | [<EndPoint "/personal">] Personal
     | [<EndPoint "/personal/rlbot">] RLBot
+    | [<EndPoint "/personal/doglasRadio">] DoglasRadio
+    | [<EndPoint "/personal/website">] Website
 
 /// The Elmish application's model.
 type Model =
@@ -215,6 +217,8 @@ let router :Router<Page, Model, Message> =
                 | ["party"] -> Some Party
                 | ["personal"] -> Some Personal
                 | ["personal"; "rlbot"] -> Some RLBot
+                | ["personal"; "doglasRadio"] -> Some DoglasRadio
+                | ["personal"; "website"] -> Some Website
                 | _ -> None
 
             match Array.toList <| path.Trim('/').Split('/') with
@@ -228,13 +232,10 @@ let router :Router<Page, Model, Message> =
             | Party -> "/party"
             | Personal -> "/personal"
             | RLBot -> "/personal/rlbot"
+            | DoglasRadio -> "/personal/doglasRadio"
+            | Website -> "/personal/website"
 
-        makeMessage = function
-            | Home -> SetPage Home
-            | Graphs -> SetPage Graphs
-            | Party -> SetPage Party
-            | Personal -> SetPage Personal
-            | RLBot -> SetPage RLBot
+        makeMessage = SetPage
 
         notFound = Some Home
     }
@@ -320,14 +321,22 @@ let menuItem (model: Model) (page: Page) (text: string) =
         .Text(text)
         .Elt()
 
+let personalPages (filterOutPage: Page) =
+    [(Personal, "Personal Projects"); (RLBot, "RLBot"); (DoglasRadio, "DoglasRadio"); (Website, "Website")] |> List.filter (fun (a:Page,_) -> a <> filterOutPage)
+
+let homePageMenuItem () =
+    [(Home, "Home")]
+
 // From the page which pages are available in the menu
 let menuPages (page: Page) =
     match page with
-    | Home -> [(Personal, "Personal Projects")]
-    | Personal -> [(Home, "Home"); (RLBot, "RLBot")]
-    | Graphs -> [(Home, "Home"); (Party, "Party")]
-    | Party -> [(Home, "Home"); (Graphs, "Graphs")]
-    | RLBot -> [(Home, "Home"); (Personal, "Personal Projects")]
+    | Home -> List.concat [homePageMenuItem(); [(Personal, "Personal Projects")]]
+    | Graphs -> homePageMenuItem()
+    | Party -> homePageMenuItem()
+    | Personal -> List.concat [homePageMenuItem(); personalPages Personal]
+    | RLBot -> List.concat [homePageMenuItem(); personalPages RLBot]
+    | DoglasRadio -> List.concat [homePageMenuItem(); personalPages DoglasRadio]
+    | Website -> List.concat [homePageMenuItem(); personalPages Website]
 
 let menuOfTuple model (page: Page, label: string) =
     menuItem model page label
@@ -342,6 +351,8 @@ let view js model dispatch =
             | Party -> partyPage js model dispatch
             | Personal -> personalPage model dispatch
             | RLBot -> rlbotPage model dispatch
+            | DoglasRadio -> doglasRadioPage model dispatch
+            | Website -> websitePage model dispatch
         )
         .Error(
             cond model.error <| function

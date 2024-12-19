@@ -204,13 +204,13 @@
       "mscorlib.dll": "sha256-qqpKd+W+AFb6UxudEYEKzrz7ma81p5LrWUwPBVvHV4U=",
       "netstandard.dll": "sha256-OYYuPT3JUknj4LdYIa58zF7kDB3tCnLzjCSuhEjtKXM=",
       "System.Private.CoreLib.dll": "sha256-EVS7zPxPV\/41g2mzPwdXtwiigWxI\/SeAHme1IgyD6tc=",
-      "Doglas.Client.dll": "sha256-ZmafWY+uRs89eu+yZ\/PHlDP8+eRHGUeAcNrZWu3H+QI="
+      "Doglas.Client.dll": "sha256-+Y9ZPp0TwOg9vjLYN+p0U9VEZ3QiSzTipRwgm0m\/Yj0="
     },
     "extensions": null,
     "lazyAssembly": null,
     "libraryInitializers": null,
     "pdb": {
-      "Doglas.Client.pdb": "sha256-shEQ11l5RBJB0\/bOrbf8hUfcPoh\/mf9\/uc5cLElsmqE="
+      "Doglas.Client.pdb": "sha256-d4t5WdIxWjzT0qHBU7Txl0L8gB+0\/k1QnsMSpdV0bt4="
     },
     "runtime": {
       "dotnet.7.0.5.og666xi4cv.js": "sha256-codB25EodaFEP43MDCfMBuKXU4LqurUKnQrpoMIFnPs=",
