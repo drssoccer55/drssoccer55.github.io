@@ -30,7 +30,7 @@ type Model =
     {
         page: Page
         error: string option
-        graphs: Graph list option // Todo break up this model why tf does it start like this
+        graphs: Graph list option // Todo break up this model
         partyComments: PartyComment list option
     }
 
@@ -55,7 +55,7 @@ let initModel =
     }
 
 
-/// The Elmish application's update messages.
+/// The Elmish application's update messages. Todo break up these messages
 type Message =
     | SetPage of Page
     | GetGraphs
@@ -213,6 +213,7 @@ let router :Router<Page, Model, Message> =
             let basicPathList l =
                 match l with
                 | [] -> Some Home
+                | [""] -> Some Home // needed to set this bc navigating back to home refreshed the whole page!
                 | ["graphs"] -> Some Graphs
                 | ["party"] -> Some Party
                 | ["personal"] -> Some Personal
