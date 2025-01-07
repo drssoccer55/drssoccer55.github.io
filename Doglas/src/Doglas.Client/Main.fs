@@ -98,7 +98,8 @@ let update (http: HttpClient) (js: IJSRuntime) message model =
     match message with
     | SetPage page ->
         match page with
-        | Graphs -> { model with page = page }, Cmd.ofMsg RenderGraphs // if navigating to graphs need to render
+        | Graphs -> { model with page = page }, Cmd.ofMsg GetGraphs
+        | Party -> { model with page = page }, Cmd.ofMsg GetPartyComments
         | _ -> { model with page = page }, Cmd.none
     | GetGraphs ->
         let spreadsheetToGraphs (s:Spreadsheet option) =
@@ -322,8 +323,8 @@ let menuItem (model: Model) (page: Page) (text: string) =
         .Text(text)
         .Elt()
 
-let personalPages (filterOutPage: Page) =
-    [(Personal, "Personal Projects"); (RLBot, "RLBot"); (DoglasRadio, "DoglasRadio"); (Website, "Website")] |> List.filter (fun (a:Page,_) -> a <> filterOutPage)
+let personalPages =
+    [(Personal, "Personal Projects"); (RLBot, "RLBot"); (DoglasRadio, "DoglasRadio"); (Website, "Website")]
 
 let homePageMenuItem () =
     [(Home, "Home")]
@@ -334,10 +335,10 @@ let menuPages (page: Page) =
     | Home -> List.concat [homePageMenuItem(); [(Personal, "Personal Projects")]]
     | Graphs -> homePageMenuItem()
     | Party -> homePageMenuItem()
-    | Personal -> List.concat [homePageMenuItem(); personalPages Personal]
-    | RLBot -> List.concat [homePageMenuItem(); personalPages RLBot]
-    | DoglasRadio -> List.concat [homePageMenuItem(); personalPages DoglasRadio]
-    | Website -> List.concat [homePageMenuItem(); personalPages Website]
+    | Personal -> List.concat [homePageMenuItem(); personalPages]
+    | RLBot -> List.concat [homePageMenuItem(); personalPages]
+    | DoglasRadio -> List.concat [homePageMenuItem(); personalPages]
+    | Website -> List.concat [homePageMenuItem(); personalPages]
 
 let menuOfTuple model (page: Page, label: string) =
     menuItem model page label
@@ -378,5 +379,5 @@ type MyApp() =
     override this.Program =
         let update = update this.HttpClient this.JSRuntime
         let view = view this.JSRuntime
-        Program.mkProgram (fun _ -> initModel, Cmd.batch (seq {Cmd.ofMsg GetGraphs; Cmd.ofMsg GetPartyComments})) update view
+        Program.mkProgram (fun _ -> initModel, Cmd.Empty) update view
         |> Program.withRouter router
