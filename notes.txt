@@ -4,11 +4,11 @@ https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly
 
 dotnet new bolero-app -o Doglas --server false
 
-dotnet publish or visual studio publish
+dotnet publish -c Release
 
-find files at Source\Website\drssoccer55.github.io\Doglas\src\Doglas.Client\bin\Release\net7.0\wwwroot\_framework
+find files at H:\Programming\Source\Website\drssoccer55.github.io\Doglas\src\Doglas.Client\bin\Release\net7.0\publish\wwwroot
 
-I don't think I need webconfig.. just need to add files
+Need to add these files to top-level so loads right on github
 
 Need to delete obj and bin folders and republish or sha hashes might be wrong
 https://stackoverflow.com/questions/69926878/failed-to-find-a-valid-digest-in-the-integrity-attribute-for-resource-in-blazo
