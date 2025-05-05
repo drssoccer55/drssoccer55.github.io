@@ -51,7 +51,7 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
     let commentContext = {
         name = "anon"
         style = "color: black"
-        textComment = "Add your comment here!"
+        textComment = ""
     }
 
     let mouseDown = fun (mea : Web.MouseEventArgs) -> 
@@ -81,13 +81,20 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
         drawContext.prevX <- tea.Touches[0].ClientX
         drawContext.prevY <- tea.Touches[0].ClientY
 
+    // I don't love doing this. Ideally check if canvas is never modified. But this is easier :/
+    let emptyCanvas = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAACWCAYAAABkW7XSAAAEYklEQVR4Xu3UAQkAAAwCwdm/9HI83BLIOdw5AgQIRAQWySkmAQIEzmB5AgIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlAABg+UHCBDICBisTFWCEiBgsPwAAQIZAYOVqUpQAgQMlh8gQCAjYLAyVQlKgIDB8gMECGQEDFamKkEJEDBYfoAAgYyAwcpUJSgBAgbLDxAgkBEwWJmqBCVAwGD5AQIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlAABg+UHCBDICBisTFWCEiBgsPwAAQIZAYOVqUpQAgQMlh8gQCAjYLAyVQlKgIDB8gMECGQEDFamKkEJEDBYfoAAgYyAwcpUJSgBAgbLDxAgkBEwWJmqBCVAwGD5AQIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlAABg+UHCBDICBisTFWCEiBgsPwAAQIZAYOVqUpQAgQMlh8gQCAjYLAyVQlKgIDB8gMECGQEDFamKkEJEDBYfoAAgYyAwcpUJSgBAgbLDxAgkBEwWJmqBCVAwGD5AQIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlAABg+UHCBDICBisTFWCEiBgsPwAAQIZAYOVqUpQAgQMlh8gQCAjYLAyVQlKgIDB8gMECGQEDFamKkEJEDBYfoAAgYyAwcpUJSgBAgbLDxAgkBEwWJmqBCVAwGD5AQIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlAABg+UHCBDICBisTFWCEiBgsPwAAQIZAYOVqUpQAgQMlh8gQCAjYLAyVQlKgIDB8gMECGQEDFamKkEJEDBYfoAAgYyAwcpUJSgBAgbLDxAgkBEwWJmqBCVAwGD5AQIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlAABg+UHCBDICBisTFWCEiBgsPwAAQIZAYOVqUpQAgQMlh8gQCAjYLAyVQlKgIDB8gMECGQEDFamKkEJEDBYfoAAgYyAwcpUJSgBAgbLDxAgkBEwWJmqBCVAwGD5AQIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlAABg+UHCBDICBisTFWCEiBgsPwAAQIZAYOVqUpQAgQMlh8gQCAjYLAyVQlKgIDB8gMECGQEDFamKkEJEDBYfoAAgYyAwcpUJSgBAgbLDxAgkBEwWJmqBCVAwGD5AQIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlAABg+UHCBDICBisTFWCEiBgsPwAAQIZAYOVqUpQAgQMlh8gQCAjYLAyVQlKgIDB8gMECGQEDFamKkEJEDBYfoAAgYyAwcpUJSgBAgbLDxAgkBEwWJmqBCVAwGD5AQIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlAABg+UHCBDICBisTFWCEiBgsPwAAQIZAYOVqUpQAgQMlh8gQCAjYLAyVQlKgIDB8gMECGQEDFamKkEJEDBYfoAAgYyAwcpUJSgBAgbLDxAgkBEwWJmqBCVAwGD5AQIEMgIGK1OVoAQIGCw/QIBARsBgZaoSlACBB1YxAJfjJb2jAAAAAElFTkSuQmCC"
+
     let saveSketch = fun _ ->
         // Async.RunSynchronously hangs, see https://github.com/fsbolero/Bolero/issues/14
         async {
             let! canvasData = Async.AwaitTask <| js.InvokeAsync("getCanvasData", key).AsTask()
-            dispatchComment { name = commentContext.name; style = commentContext.style; comment = canvasData} // First submit image
-            dispatchComment { name = commentContext.name; style = commentContext.style; comment = commentContext.textComment} // Now text!
+            if (canvasData <> emptyCanvas) then
+                dispatchComment { name = commentContext.name; style = commentContext.style; comment = canvasData} // First submit image
+            if (commentContext.textComment.Length <> 0) then
+                dispatchComment { name = commentContext.name; style = commentContext.style; comment = commentContext.textComment} // Now text!
             js.InvokeVoidAsync("clear", key) |> ignore
+            commentContext.name <- "anon"
+            commentContext.textComment <- ""
         } |> Async.Start
 
     let optionColor color =
@@ -107,13 +114,13 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
         div {
             text "Name: "
             input {
-                on.change (fun e -> commentContext.name <- (unbox e.Value))
+                bind.change.string commentContext.name (fun s -> commentContext.name <- s)
             }
         }
         div {
             text "Comment: "
             input {
-                on.change (fun e -> commentContext.textComment <- (unbox e.Value))
+                bind.change.string commentContext.textComment (fun s -> commentContext.textComment <- s)
             }
         }
         div {
