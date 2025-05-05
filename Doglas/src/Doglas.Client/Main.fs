@@ -13,59 +13,8 @@ open Chart
 open Utils
 open PartySketch
 open Personal
-
-/// Routing endpoints definition.
-// I don't think the EndPoint attribute gets used now that I have a custom router.
-type Page =
-    | [<EndPoint "/">] Home
-    | [<EndPoint "/graphs">] Graphs
-    | [<EndPoint "/party">] Party
-    | [<EndPoint "/personal">] Personal
-    | [<EndPoint "/personal/rlbot">] RLBot
-    | [<EndPoint "/personal/doglasRadio">] DoglasRadio
-    | [<EndPoint "/personal/website">] Website
-
-/// The Elmish application's model.
-type Model =
-    {
-        page: Page
-        error: string option
-        graphs: Graph list option // Todo break up this model
-        partyComments: PartyComment list option
-    }
-
-and Graph =
-    {
-        chart: Chart
-        key: string
-    }
-and PartyComment =
-    {
-        name: string
-        comment: string
-        style: string
-    }
-
-let initModel =
-    {
-        page = Home
-        error = None
-        graphs = None
-        partyComments = None
-    }
-
-
-/// The Elmish application's update messages. Todo break up these messages
-type Message =
-    | SetPage of Page
-    | GetGraphs
-    | GotGraphs of Graph list
-    | RenderGraphs
-    | GetPartyComments
-    | GotPartyComments of PartyComment list
-    | Error of exn
-    | ClearError
-    | SendPartyComment of PartySketch.Comment
+open Party
+open Model
 
 let log (js: IJSRuntime) (s:obj) = js.InvokeVoidAsync("console.log", s) |> ignore
 let error (js: IJSRuntime) (s:obj) = js.InvokeVoidAsync("console.error", s) |> ignore
@@ -93,7 +42,7 @@ let jsonToSpreadsheet js (s:string) =
         | :? System.Text.Json.JsonException as ex -> error js ("Cannot convert json to spreadsheet because the json is invalid: " + ex.ToString()); None
         | :? System.NotSupportedException as ex -> error js ("Cannot convert json to spreadsheet because no compatible deserializer: " + ex.ToString()); None
 
-let update (http: HttpClient) (js: IJSRuntime) message model =
+let update (http: HttpClient) (js: IJSRuntime) (message:Model.Message) model =
     log js message
     match message with
     | SetPage page ->
@@ -261,56 +210,6 @@ let graphsPage model dispatch =
                     }
                 |> forEach graphs
         )
-        .Elt()
-
-let partyPage js model dispatch =
-
-    let dispatchComment partySketch = SendPartyComment(partySketch) |> dispatch
-
-    let paddedHeader str =
-        th {
-            attr.style "padding: 6px"
-            text str
-        }
-
-    let paddedRowNode (node:Node) =
-        td {
-            attr.style "padding: 6px"
-            node
-        }
-
-    let paddedRowData str =
-        text str |> paddedRowNode
-
-    let paddedRowDataImg (str: string) =
-        match str with
-        | a when str.StartsWith "data:image" ->
-            img {
-                attr.src str
-            } |> paddedRowNode
-        | _ -> paddedRowData str
-
-
-    Main.Party()
-        .PartyComments(cond model.partyComments <| function
-            | None -> empty()
-            | Some comments ->
-                table {
-                    attr.border "1px solid black"
-                    tr {
-                        paddedHeader "Name"
-                        paddedHeader "Comment"
-                    }
-                    fun comment ->
-                        tr {
-                            attr.style (comment.style)
-                            paddedRowData comment.name
-                            paddedRowDataImg comment.comment
-                        }
-                    |> forEach comments
-                }
-        )
-        .PartySketch(PartySketch.createCanvas(js, dispatchComment, "sketchCanvas"))
         .Elt()
 
 let emptyPage model dispatch =

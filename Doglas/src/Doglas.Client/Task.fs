@@ -1,6 +1,5 @@
 ﻿module Doglas.Client.Task 
 
-open System
 open System.Threading.Tasks
 
 // Stolen from here: https://github.com/fsprojects/FSharpPlus/blob/357e2d2b85e046f50a6ba0de4a4c4b547679ebc3/src/FSharpPlus/Extensions/Task.fs#L18
@@ -35,4 +34,3 @@ let map (f: 'T -> 'U) (source: Task<'T>) : Task<'U> =
                         with e -> tcs.SetException e
                 source.ContinueWith k |> ignore
                 tcs.Task
-

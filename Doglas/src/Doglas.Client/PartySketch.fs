@@ -23,6 +23,7 @@ and CommentContext =
     {
         mutable name: string
         mutable style: string
+        mutable textComment: string
     }
 and Sketch = 
     {
@@ -50,6 +51,7 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
     let commentContext = {
         name = "anon"
         style = "color: black"
+        textComment = "Add your comment here!"
     }
 
     let mouseDown = fun (mea : Web.MouseEventArgs) -> 
@@ -83,7 +85,9 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
         // Async.RunSynchronously hangs, see https://github.com/fsbolero/Bolero/issues/14
         async {
             let! canvasData = Async.AwaitTask <| js.InvokeAsync("getCanvasData", key).AsTask()
-            dispatchComment { name = commentContext.name; style = commentContext.style; comment = canvasData}
+            dispatchComment { name = commentContext.name; style = commentContext.style; comment = canvasData} // First submit image
+            dispatchComment { name = commentContext.name; style = commentContext.style; comment = commentContext.textComment} // Now text!
+            js.InvokeVoidAsync("clear", key) |> ignore
         } |> Async.Start
 
     let optionColor color =
@@ -104,6 +108,12 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
             text "Name: "
             input {
                 on.change (fun e -> commentContext.name <- (unbox e.Value))
+            }
+        }
+        div {
+            text "Comment: "
+            input {
+                on.change (fun e -> commentContext.textComment <- (unbox e.Value))
             }
         }
         div {
@@ -146,9 +156,13 @@ let createCanvas (js: IJSRuntime, dispatchComment: (Comment -> unit), key: strin
         }
 
         div {
+            text "Please wait a few seconds after submitting for page to refresh. Thanks!"
+        }
+
+        div {
             button {
                 on.click saveSketch
-                "Save Sketch"
+                "Submit"
             }
             button {
                 on.click (fun _ -> js.InvokeVoidAsync("clear", key) |> ignore)
