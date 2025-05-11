@@ -172,9 +172,30 @@ let router :Router<Page, Model, Message> =
                 | ["personal"; "website"] -> Some Website
                 | _ -> None
 
-            match Array.toList <| path.Trim('/').Split('/') with
-            | "?p=" :: p -> basicPathList p
-            | l -> basicPathList l
+            // have to do this because facebook adds a lil ?fbclid bullshit I don't want. Trying to handle params responsibly
+            // I have to handle both my ?p workaround for deep linking and potential params. So I'm just folding it together.
+            let getParams (s:string) =
+                let potentialParams = s.Split("?")
+                if potentialParams.Length <= 1 then
+                    Map.empty
+                else
+                    fun (z:string) ->
+                        let alternatingParams = z.Split("=")
+                        if alternatingParams.Length % 2 <> 0 then
+                            Map.empty // think this is necessary for empty string case but also just safer and cleaner
+                        else
+                            Seq.ofArray alternatingParams |> Seq.chunkBySize 2 |> Seq.map (fun a -> a.[0], a.[1]) |> Map.ofSeq
+                    |> Array.map <| potentialParams
+                    |> Array.fold (fun m newM -> Map.foldBack Map.add m newM) Map.empty
+
+            let potentialParams = getParams path
+
+            if potentialParams.ContainsKey("p") then
+                let s = potentialParams.TryFind "p" |> Option.get
+                s.Trim('/').Split('/') |> Array.toList |> basicPathList
+            else
+                let cleanPath = path.Split('?')[0]
+                cleanPath.Trim('/').Split('/') |> Array.toList |> basicPathList
 
         // getRoute : Page -> string
         getRoute = function
