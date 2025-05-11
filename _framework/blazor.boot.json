@@ -9,7 +9,7 @@
     "assembly": {
       "Bolero.dll": "sha256-bnpFMH03qOnXhLiZ8Rgv8ktAROuNOWNCKvXWjeAv9Gk=",
       "Bolero.Html.dll": "sha256-6eZZM\/\/HPccP8J87iklWGb1eEHm0vmOr6RINaBdO8zM=",
-      "Doglas.Client.dll": "sha256-2Q9g+FltI20aiiqGMkIvYFAvvEZWst32UmQHqyQWXe0=",
+      "Doglas.Client.dll": "sha256-A4wxDYJPZ6p+Btoj6FN271cQz3uQTzxWOIvkRNRcIO4=",
       "Elmish.dll": "sha256-HDi93AnkbpX\/enyhhcoFohWa9jbYYo4bBqwS5qsb2nQ=",
       "FSharp.Core.dll": "sha256-D+4qoF80wtVMz3tGNhrxdN80EUHVO2zrWabc2PxODi4=",
       "FSharp.SystemTextJson.dll": "sha256-E84sZ+nWvz1PWwnkjs+EVv84zf1Qbg97P8N1zHM1F4M=",
@@ -44,7 +44,7 @@
       "System.Net.Primitives.dll": "sha256-voTFtlTk65vDMKp27+l6klBwL2L\/uEnrSfIHCdq+7Lg=",
       "System.Net.Requests.dll": "sha256-\/eOKdT\/9FR965bPuxinl0nZWTSlbNPqgkrcfJh5NFVQ=",
       "System.Net.WebClient.dll": "sha256-+x62WSa8w0v71JzYQu3JOSejx1auJRxJ\/AH7FyWtUPw=",
-      "System.Private.CoreLib.dll": "sha256-XuCOlhZmTP6WYIe4Xr1c8t9Pwdef+5002s7zfZ7adls=",
+      "System.Private.CoreLib.dll": "sha256-jYGXqeCm+dfD2WgPLTFr\/aE35BpZvq97L4golzZp3Xw=",
       "System.Private.Uri.dll": "sha256-uuoFqsyYVEgcT81tUc3Z9VdqQfido6QlJd9Pj3qKPNM=",
       "System.Runtime.dll": "sha256-cNuI41AeFW+D20RjkoEaK2XiJPS2P7z\/\/ep37zlyce8=",
       "System.Runtime.InteropServices.JavaScript.dll": "sha256-xQbATUiyP+9FskXnIZjMPfWI2fliO8eL9DW2ykdx4AY=",

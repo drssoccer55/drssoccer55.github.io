@@ -175,7 +175,7 @@ let router :Router<Page, Model, Message> =
             // have to do this because facebook adds a lil ?fbclid bullshit I don't want. Trying to handle params responsibly
             // I have to handle both my ?p workaround for deep linking and potential params. So I'm just folding it together.
             let getParams (s:string) =
-                let potentialParams = s.Split("?")
+                let potentialParams = s.Split('?', '&')
                 if potentialParams.Length <= 1 then
                     Map.empty
                 else
